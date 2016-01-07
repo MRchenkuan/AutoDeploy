@@ -1,7 +1,6 @@
 # coding:utf-8
 from fabric.api import *
 from fabric.context_managers import *
-from fabric.contrib.console import confirm
 from fabric.colors import *
 
 from AutoDeployment.tools import *
