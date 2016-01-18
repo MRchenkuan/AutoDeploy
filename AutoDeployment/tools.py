@@ -61,5 +61,7 @@ def shutdownTomcat(hostPort, hostPath, workPath):
 # 启动应用
 def startupTomcat(hostPort, hostPath, workPath):
     if (not isProtExist(hostPort)):
+        print red("删除缓存文件...")
+        run('rm -rf %s/work/*' % workPath)
         run('set -m; sh %s/bin/startup.sh' % workPath)
         waitPortStart(hostPort)

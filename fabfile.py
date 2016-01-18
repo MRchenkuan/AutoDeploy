@@ -1,6 +1,7 @@
 # coding:utf-8
 from fabric.api import *
 from fabric.context_managers import *
+from fabric.contrib.console import confirm
 from fabric.colors import *
 
 from AutoDeployment.tools import *
@@ -176,8 +177,46 @@ def confByInst(app, ip, port, fromPath, fName, toPath, instId):
 
 
 #######################
-# 服务器tomcat停止部分 #
+# 服务器tomcat 启停部分 #
 #######################
+def rest():
+    local("clear")
+    print "--------------------"
+    print "请选择要重启的应用:"
+    print "1.foundation"
+    print "2.batch"
+    print "3.fund"
+    print "4.trade"
+    print "5.cashier"
+    print "6.repeat"
+    print "7.fdc"
+    print "8.runman"
+    print "9.全部"
+    print "0.退出"
+    print ""
+    print "---------------------"
+    while True:
+        try:
+            slct = int(input("请选择要部署的应用: "))
+            if (slct == 0):
+                print "已选择：退出"
+                return True
+            if (slct == 9):
+                print "已选择：重启全部"
+                depAll()
+                return True
+            print "已选择重启：" + applist[int(slct) - 1]
+            print red("关闭 %s 服务中..."%applist[int(slct) - 1])
+            stopAllHostOf(applist[int(slct) - 1])
+            print green("启动 %s 服务中..."%applist[int(slct) - 1])
+            time.sleep(1)
+            startAllHostOf(applist[int(slct) - 1])
+            break
+        except:
+            print"选择类型错误,请输入有效选项..."
+            continue
+
+# 停止
 def stopAll(applist=applist):
     for app in applist:
         stopAllHostOf(app)
@@ -203,6 +242,35 @@ def stopSingleHost(target):
     with settings(host_string=hostIp):
         try:
             shutdownTomcat(hostPort, hostPath, hostPath + '../' + workPath)
+        except Exception, e:
+            print e
+
+# 启动
+def startAll(applist=applist):
+    for app in applist:
+        startAllHostOf(app)
+
+
+def startAllHostOf(app):
+    targets = getConfPath(rulesPath, app)
+    if (targets and len(targets) >= 0):
+        for target in targets:
+            startSingleHost(target)
+
+
+def startSingleHost(target):
+    try:
+        index = target[0]
+        hostIp = target[1]
+        hostPort = target[2]
+        hostPath = target[3]
+    except Exception, e:
+        print red('解析目标地址失败！')
+        print red(target)
+    # 切换上下文环境
+    with settings(host_string=hostIp):
+        try:
+            startupTomcat(hostPort, hostPath, hostPath + '../' + workPath)
         except Exception, e:
             print e
 
