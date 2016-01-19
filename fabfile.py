@@ -45,16 +45,12 @@ def dep():
     print ""
     print "--------------------"
     print "请选择要部署的应用:"
-    print "1.foundation"
-    print "2.batch"
-    print "3.fund"
-    print "4.trade"
-    print "5.cashier"
-    print "6.repeat"
-    print "7.fdc"
-    print "8.runman"
-    print "9.全部"
-    print "0.退出"
+    i = 1
+    for app in applist:
+        print "%s. %s" % (i, app)
+        i += 1
+    print "9. 全部"
+    print "0. 退出"
     print ""
     print "---------------------"
     while True:
@@ -77,47 +73,142 @@ def dep():
 
 def bak():
     local("clear")
-    print "请选择要备份的内容:"
+    print "---------------------"
+    print "请选择要备份还原的内容:"
     print ""
-    print "1.所有机器的配置文件"
-    print "0.退出"
+    print "1. ↓↓ 备份所有机器的 应用 配置文件"
+    print "2. ↑↑ 还原所有机器的 应用 配置文件"
+    print "3. ↓↓ 备份所有机器的 Tomcat 配置文件"
+    print "4. ↑↑ 还原所有机器的 Tomcat 配置文件"
+    print "0. 退出"
     print ""
     print "---------------------"
     while True:
-        try:
-            slct = int(input("需要备份的内容: "))
-            if (slct == 0):
-                print "已选择：退出"
-                return True
-            if (slct == 1):
-                confBak()
-                break
-            else:
-                print "找不到选项:%s" % slct
-        except:
-            print"选择类型错误,请输入有效选项..."
-            continue
+        # try:
+        slct = int(input("需要备份的内容: "))
+        if (slct == 0):
+            print "已选择：退出"
+            return True
+        if (slct == 1):
+            conf_bak()
+            break
+        if (slct == 2):
+            local("cd ./confBak/ && ls conf*.tar")
+            print ""
+            tar_name = raw_input("请输入需要还原的tar包全名: ")
+            conf_rst(tar_name)
+            break
+        if (slct == 3):
+            tomcat_xml_bak()
+            break
+        if (slct == 4):
+            local("cd ./confBak/ && ls tom*.tar")
+            print ""
+            tar_name = raw_input("请输入需要还原的tar包全名: ")
+            tomcat_xml_rst(tar_name)
+            break
+        else:
+            print "找不到选项:%s" % slct
+            # except:
+            #     print"选择类型错误,请输入有效选项..."
+            #     continue
 
 
-####################
-# 配置文件的备份部分 #
-####################
-def confBak():
+######################
+# 应用配置文件的备份部分#
+######################
+def conf_bak():
     print blue("开始备份所有配置文件...")
-    confs = {}
     for app in applist:
         instList = getConfPath(rulesPath, app)
         for inst in instList:
+            inst_no = inst[0]
             ip = inst[1]
             port = inst[2]
             rmtPath = inst[3] + '../conf/*'
             with settings(host_string=ip):
-                localPath = "%s/confs/%s/conf-%s-%s" % (confBakPath, app, ip, port)
+                localPath = "%s/apps/%s/conf-%s-%s-%s" % (confBakPath, app, app, inst_no, port)
                 local("mkdir -p %s" % localPath)
                 get(rmtPath, localPath)
     backTarName = 'confs-' + time.strftime('%Y%m%d%H%m%S', time.localtime(time.time()))
-    local("cd %s&&tar -rf %s.tar ./confs/* && rm -rf ./confs" % (confBakPath, backTarName))
+    local("cd %s&&tar -rf %s.tar ./apps/* && rm -rf ./apps" % (confBakPath, backTarName))
     print blue("备份完毕：\n %s.tar 保存在：%s 中" % (backTarName, confBakPath))
+
+
+######################
+# 应用配置文件的还原部分#
+######################
+def conf_rst(tar_name):
+    if os.path.exists("/data/oper/confBak/%s" % tar_name):
+        print blue(">>>>解包配置文件...")
+        local("cd /data/oper/confBak && rm -rf apps && tar -xvf %s" % tar_name)
+        for app in applist:
+            instList = getConfPath(rulesPath, app)
+            for inst in instList:
+                inst_no = inst[0]
+                ip = inst[1]
+                port = inst[2]
+                rmtPath = inst[3] + '../conf/'
+                with settings(host_string=ip):
+                    localPath = "%s/apps/%s/" % (confBakPath, app)
+                    local_folder_name = "conf-%s-%s-%s" % (app, inst_no, port)
+                    # 个性化各台机器配置 - 可选
+                    mod_sigle_inst(app, ip, port, localPath + local_folder_name, "server.properties", inst_no)
+                    mod_sigle_inst(app, ip, port, localPath + local_folder_name, "system.properties", inst_no)
+                    # 建立远程路径
+                    run("mkdir -p %s" % inst[3])
+                    run("cd %s../ && mkdir -p ./conf/" % (inst[3]))
+                    put(localPath + local_folder_name + "/*", rmtPath)
+        local("cd /data/oper/confBak && rm -rf apps")
+        print blue("还原完毕!")
+    else:
+        print "并没有找到包 %s" % tar_name
+
+
+##########################
+# tomecat配置文件的备份部分 #
+##########################
+def tomcat_xml_bak():
+    print blue("开始备份所有配置文件...")
+    for app in applist:
+        instList = getConfPath(rulesPath, app)
+        for inst in instList:
+            inst_no = inst[0]
+            ip = inst[1]
+            port = inst[2]
+            rmtPath = inst[3] + '../tomcat/conf/server.xml'
+            with settings(host_string=ip):
+                localPath = "%s/tomcats/%s/" % (confBakPath, app)
+                local_name = "server.xml-%s-%s-%s" % (app, inst_no, port)
+                local("mkdir -p %s" % localPath)
+                get(rmtPath, localPath + local_name)
+    backTarName = 'tomcs-' + time.strftime('%Y%m%d%H%m%S', time.localtime(time.time()))
+    local("cd %s&&tar -rf %s.tar ./tomcats/* && rm -rf ./tomcats" % (confBakPath, backTarName))
+    print blue("备份完毕：\n %s.tar 保存在：%s 中" % (backTarName, confBakPath))
+
+
+def tomcat_xml_rst(tar_name):
+    if os.path.exists("/data/oper/confBak/%s" % tar_name):
+        print blue(">>>>解包配置文件...")
+        local("cd /data/oper/confBak && rm -rf tomcats && tar -xvf %s" % tar_name)
+        for app in applist:
+            instList = getConfPath(rulesPath, app)
+            for inst in instList:
+                inst_no = inst[0]
+                ip = inst[1]
+                port = inst[2]
+                rmtPath = inst[3] + '../tomcat/conf/'
+                with settings(host_string=ip):
+                    localPath = "%s/tomcats/%s/" % (confBakPath, app)
+                    local_name = "server.xml-%s-%s-%s" % (app, inst_no, port)
+                    # 建立远程路径
+                    run("mkdir -p %s" % inst[3])
+                    run("cd %s../ && mkdir -p ./tomcat/conf/" % (inst[3]))
+                    put(localPath + local_name, rmtPath + "server.xml")
+        local("cd /data/oper/confBak && rm -rf tomcats")
+        print blue("还原完毕!")
+    else:
+        print "并没有找到包 %s" % tar_name
 
 
 ##############
@@ -129,7 +220,7 @@ def upto(fr, ip, to):
 
 
 ####################
-# 配置文件的上传部分 #
+# 配置文件按模板的上传部分 #
 ####################
 def confAll(applist=applist):
     for app in applist:
@@ -155,7 +246,7 @@ def confByInst(app, ip, port, fromPath, fName, toPath, instId):
         # fdsfsafafafdpas
         prop = Properties(fromPath + fName)
 
-        if (fName == "system.properties"):
+        if fName == "system.properties":
             prop.set("sys.home", "/data/%s/" % app)
             prop.set("sys.runmode", "product")
             prop.set("sys.encoding", "UTF-8")
@@ -165,7 +256,7 @@ def confByInst(app, ip, port, fromPath, fName, toPath, instId):
             prop.set("log.level", "DEBUG")
             prop.set("log.limits_lines", "20")
             prop.close()
-        if (fName == "server.properties"):
+        if fName == "server.properties":
             prop.set("server.port", "%s" % port)
             prop.set("dubbo.host", ip)
             prop.set("dubbo.name", "%s-provider" % app)
@@ -176,6 +267,29 @@ def confByInst(app, ip, port, fromPath, fName, toPath, instId):
         put(fromPath + fName, toPath)
 
 
+def mod_sigle_inst(app, ip, port, fromPath, fName, instId):
+    # 修改文件
+    prop = Properties(fromPath +"/"+ fName)
+
+    if fName == "system.properties":
+        # prop.set("sys.home", "/data/%s/" % app)
+        prop.set("sys.runmode", "product")  # ?????????????????????
+        # prop.set("sys.encoding", "UTF-8")
+        # prop.set("server.name", "%s" % app) #小写应用名
+        # prop.set("application.name", "%s" %app.upper()) # 大写应用名
+        prop.set("instance.id", "%s_%s" % (app.upper(), instId))
+        prop.set("log.level", "DEBUG")  # ?????????????????????
+        # prop.set("log.limits_lines", "20")
+        prop.close()
+    if fName == "server.properties":
+        prop.set("server.port", "%s" % port)
+        prop.set("dubbo.host", ip)
+        prop.set("memcache.server", "10.10.1.11:11211")  # ?????????????????????
+        prop.set("dubbo.registry", "zookeeper://10.10.1.11:2181")  # ?????????????????????
+        # prop.set("dubbo.name", "%s-provider" % app)
+        prop.close()
+
+
 #######################
 # 服务器tomcat 启停部分 #
 #######################
@@ -183,16 +297,12 @@ def rest():
     local("clear")
     print "--------------------"
     print "请选择要重启的应用:"
-    print "1.foundation"
-    print "2.batch"
-    print "3.fund"
-    print "4.trade"
-    print "5.cashier"
-    print "6.repeat"
-    print "7.fdc"
-    print "8.runman"
-    print "9.全部"
-    print "0.退出"
+    i = 1
+    for app in applist:
+        print "%s. %s" % (i, app)
+        i += 1
+    print "9. 全部"
+    print "0. 退出"
     print ""
     print "---------------------"
     while True:
@@ -206,15 +316,16 @@ def rest():
                 depAll()
                 return True
             print "已选择重启：" + applist[int(slct) - 1]
-            print red("关闭 %s 服务中..."%applist[int(slct) - 1])
+            print red("关闭 %s 服务中..." % applist[int(slct) - 1])
             stopAllHostOf(applist[int(slct) - 1])
-            print green("启动 %s 服务中..."%applist[int(slct) - 1])
+            print green("启动 %s 服务中..." % applist[int(slct) - 1])
             time.sleep(1)
             startAllHostOf(applist[int(slct) - 1])
             break
         except:
             print"选择类型错误,请输入有效选项..."
             continue
+
 
 # 停止
 def stopAll(applist=applist):
@@ -244,6 +355,7 @@ def stopSingleHost(target):
             shutdownTomcat(hostPort, hostPath, hostPath + '../' + workPath)
         except Exception, e:
             print e
+
 
 # 启动
 def startAll(applist=applist):

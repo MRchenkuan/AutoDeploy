@@ -9,9 +9,9 @@ class Properties():
         flen = len(self.lines) - 1
         for i in range(flen):
             line = self.lines[i]
-            if (line.find("=") > 0):
+            if line.find("=") > 0:
                 _key = line.split("=")[0].strip()
-                if (_key == key):
+                if _key == key:
                     self.lines[i] = _key + "=" + val + "\n"
 
     def close(self):
