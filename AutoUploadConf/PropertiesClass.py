@@ -12,7 +12,7 @@ class Properties():
             if (line.find("=") > 0):
                 _key = line.split("=")[0].strip()
                 if (_key == key):
-                    self.lines[i] = _key + " = " + val + "\n"
+                    self.lines[i] = _key + "=" + val + "\n"
 
     def close(self):
         fo = open(self.path, 'w')
