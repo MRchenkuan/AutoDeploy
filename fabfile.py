@@ -313,7 +313,10 @@ def rest():
                 return True
             if (slct == 9):
                 print "已选择：重启全部"
-                depAll()
+                print "..."
+                time.sleep(1)
+                print "怎么能启全部,万一卡了呢?"
+                time.sleep(1)
                 return True
             print "已选择重启：" + applist[int(slct) - 1]
             print red("关闭 %s 服务中..." % applist[int(slct) - 1])
