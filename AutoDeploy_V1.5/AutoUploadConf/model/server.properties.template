@@ -5,8 +5,8 @@ log.home=../../logs
 sys.runmode=develop
 #\u65e5\u5fd7\u7f16\u7801
 sys.encoding=UTF-8
-application.name=GIGOLD-GATEWAY-ALIPAY
-server.name=gigold-gateway-alipay
+application.name=xxxxxxxxx
+server.name=xxxxxxxx
 #\u5b9e\u4f8b
 instance.id=GIGOLD-GATEWAY-ALIPAY_1
 #\u65e5\u5fd7\u7ea7\u522b
@@ -14,7 +14,7 @@ log.level=DEBUG
 #\u5355\u4e2a\u65e5\u5fd7\u6587\u4ef6\u5927\u5c0f\uff0c\u5355\u4f4d\uff1aMB
 log.limits_lines=20
 
-memcache.server=182.92.170.189:11211
+memcache.server=xxxxxxxxx
 
 bus.mysql.url=jdbc:xxxx
 bus.mysql.username=xxxx
@@ -28,15 +28,15 @@ config.mysql.password=xxxxxxx
 config.mysql.initialSize=0
 config.mysql.maxActive=20
 
-dubbo.name=gigold-gateway-alipay-provider
-dubbo.host=123.57.152.75
-dubbo.port=22302
+dubbo.name=xxxxxxxxxxxxx
+dubbo.host=xxxxxx
+dubbo.port=xxxxxx
 dubbo.timeout=5000
 dubbo.check=true
-dubbo.registry=zookeeper://182.92.170.189:2181
+dubbo.registry=xxxxxxxx
 
-redis.host=182.92.170.189
+redis.host=xxxxxxxxxxx
 #product03:Dubbo
-mesrvAddr=182.92.170.189:9876
+mesrvAddr=xxxxxxxxx
 XXTEA.key.des=xxx
 md5.key.des=xxx
