@@ -16,15 +16,15 @@ log.limits_lines=20
 
 memcache.server=182.92.170.189:11211
 
-bus.mysql.url=jdbc:mysql://rds80ubr9x806azaml24.mysql.rds.aliyuncs.com:3306/foudation?characterEncoding=utf8&zeroDateTimeBehavior=round
-bus.mysql.username=newland
-bus.mysql.password=123456
+bus.mysql.url=jdbc:xxxx
+bus.mysql.username=xxxx
+bus.mysql.password=xxx
 bus.mysql.initialSize=0
 bus.mysql.maxActive=20
 
-config.mysql.url=jdbc:mysql://rds80ubr9x806azaml24.mysql.rds.aliyuncs.com:3306/configuration?characterEncoding=utf8&zeroDateTimeBehavior=round
-config.mysql.username=newland
-config.mysql.password=123456
+config.mysql.url=xxxx
+config.mysql.username=xxxx
+config.mysql.password=xxxxxxx
 config.mysql.initialSize=0
 config.mysql.maxActive=20
 
@@ -38,5 +38,5 @@ dubbo.registry=zookeeper://182.92.170.189:2181
 redis.host=182.92.170.189
 #product03:Dubbo
 mesrvAddr=182.92.170.189:9876
-XXTEA.key.des=123456
-md5.key.des=J58l2qudG8uCeae4JcWBl2en9zv7xvFa
+XXTEA.key.des=xxx
+md5.key.des=xxx
