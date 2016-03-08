@@ -32,7 +32,7 @@ pathMap = MapRuleParser(rulesPath, resourcePath)
 
 # 服务器账号
 env.user = 'root'
-env.password = 'DENGqingyong123'
+env.password = 'xxxxxxxx'
 env.hosts = []
 
 # 默认app配置单
@@ -319,7 +319,8 @@ def upto(fr, ip, to):
 ####################
 def confAll(applist=applist):
     for app in applist:
-        confByApp(app, "server.properties.template")
+        confByApp(app, "system.properties")
+        confByApp(app, "server.properties")
 
 
 def confByApp(app, fName):
@@ -330,7 +331,7 @@ def confByApp(app, fName):
         instId = rule[0]
         ip = rule[1]
         port = rule[2]
-        toPath = rule[3] + app + '/conf/'
+        toPath = rule[3] + '../conf/'
         confByInst(app, ip, port, confModPath, fName, toPath, instId)
 
 
@@ -340,33 +341,25 @@ def confByInst(app, ip, port, fromPath, fName, toPath, instId):
         # fdsfsafafafdpas
         prop = Properties(fromPath + fName)
 
-        if fName == "server.properties.template":
-            prop.set("sys.home", "../../logs")
-            prop.set("sys.runmode", "develop")
+        if fName == "system.properties":
+            prop.set("sys.home", "/data/%s/" % app)
+            prop.set("sys.runmode", "product")
             prop.set("sys.encoding", "UTF-8")
-            prop.set("application.name", "%s" % app.upper())
-            prop.set("server.name", "%s" % app)
+            prop.set("server.name", "%s" % app.upper())
+            prop.set("application.name", "USRAPP")
             prop.set("instance.id", "%s_%s" % (app.upper(), instId))
             prop.set("log.level", "DEBUG")
             prop.set("log.limits_lines", "20")
-
-            prop.set("redis.host", "182.92.170.189")
-            prop.set("memcache.server", "182.92.170.189:11211")
-            print "###%s###"%port
-            prop.set("dubbo.port", "%s" % port)
+            prop.close()
+        if fName == "server.properties":
+            prop.set("server.port", "%s" % port)
             prop.set("dubbo.host", ip)
-            prop.set("dubbo.registry", "zookeeper://182.92.170.189:2181")
-            if "web" in app.lower():
-                prop.set("dubbo.name", "%s-consumer" % app)
-                prop.set("mesrvAddr", "")
-            else:    
-                prop.set("dubbo.name", "%s-provider" % app)
-                prop.set("mesrvAddr", "182.92.170.189:9876")
+            prop.set("dubbo.name", "%s-provider" % app)
             prop.close()
 
         # 上传到目的路径
         run('mkdir -p %s' % toPath)
-        put(fromPath + fName, toPath + 'server.properties')
+        put(fromPath + fName, toPath)
 
 
 def mod_sigle_inst(app, ip, port, fromPath, fName, instId):
